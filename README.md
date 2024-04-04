@@ -1,6 +1,6 @@
 # DocMorph
 
-DocMorph is a simple Go tool that helps you quickly turn .docx templates into personalized PDFs, ideal for sending out software license details like Microsoft 365 to your customers. 
+Personal project to make my life easier. DocMorph is a simple Go tool that helps to quickly turn .docx templates into personalized PDFs, ideal for sending out software license details like Microsoft 365 to your customers
 
 ## Features
 
