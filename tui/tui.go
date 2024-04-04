@@ -3,6 +3,7 @@ package tui
 import (
 	"docmorph/docs"
 	"log"
+	"os"
 
 	"github.com/rivo/tview"
 )
@@ -17,38 +18,41 @@ type UserData struct {
 
 // StartTUI initializes and displays the Terminal User Interface
 func StartTUI() *UserData {
-	app := tview.NewApplication()
+	app := tview.NewApplication().EnableMouse(true)
 
 	// Create a new form.
 	form := tview.NewForm().
-		AddInputField("Order Number", "", 20, nil, func(text string) {
-			// Input validation or manipulation can be done here.
-		}).
+		AddInputField("Order Number", "", 20, nil, nil).
 		AddInputField("Name", "", 20, nil, nil).
 		AddInputField("Activation Code", "", 20, nil, nil)
-	form.SetBorder(true).SetTitle("Enter Details").SetTitleAlign(tview.AlignLeft)
 
 	// Attempt to list .docx templates from the specified directory.
 	templateDir := "./templates"
-	TemplateList, err := docs.ListDocxTemplates(templateDir)
+	templateList, err := docs.ListDocxTemplates(templateDir)
 	if err != nil {
 		log.Fatalf("Failed to list .docx templates: %v", err)
 	}
 
-	// Dropdown for template selection.
+	// Variable to hold the selected template.
 	var selectedTemplate string
-	form.AddDropDown("Select Template: ", TemplateList, 0, func(option string, index int) {
-		selectedTemplate = option
-		log.Printf("Template selected: %s", selectedTemplate) // Logging the selected template
+
+	// Dropdown for template selection.
+	form.AddDropDown("Select Template: ", templateList, 0, func(option string, index int) {
+		selectedTemplate = option // Update the selected template based on the user's selection.
 	})
 
 	// Submit button to finalize the form.
 	form.AddButton("Submit", func() {
 		app.Stop()
 	})
-	form.SetBorder(true).SetTitle("Enter Details").SetTitleAlign(tview.AlignLeft)
 
-	if err := app.SetRoot(form, true).Run(); err != nil {
+	// Exit button to exit the application.
+	form.AddButton("Exit", func() {
+		os.Exit(0)
+	})
+
+	// Set the form as the root and focus it.
+	if err := app.SetRoot(form, true).SetFocus(form).Run(); err != nil {
 		log.Fatalf("Failed to start TUI: %v", err)
 	}
 
@@ -59,10 +63,6 @@ func StartTUI() *UserData {
 		ActivationCode:   form.GetFormItemByLabel("Activation Code").(*tview.InputField).GetText(),
 		SelectedTemplate: selectedTemplate,
 	}
-
-	// Log collected user data.
-	log.Printf("User Data Collected: OrderNumber: %s, Name: %s, ActivationCode: %s, SelectedTemplate: %s",
-		userData.OrderNumber, userData.Name, userData.ActivationCode, userData.SelectedTemplate)
 
 	return userData
 }
